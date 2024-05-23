@@ -1,0 +1,16 @@
+<data-extraction-rules>
+  <cloud-backup>
+    <!--
+    <cloud-backup>
+        <include .../>
+        <exclude .../>
+    </cloud-backup>
+    -->
+  </cloud-backup>
+  <!--
+    <device-transfer>
+        <include .../>
+        <exclude .../>
+    </device-transfer>
+    -->
+</data-extraction-rules>
