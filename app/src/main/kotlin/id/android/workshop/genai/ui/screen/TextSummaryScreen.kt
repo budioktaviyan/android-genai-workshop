@@ -1,5 +1,6 @@
 package id.android.workshop.genai.ui.screen
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,6 +20,7 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -36,6 +38,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import id.android.workshop.genai.R
+import id.android.workshop.genai.feature.textsummary.TextSummary
+import id.android.workshop.genai.feature.textsummary.TextSummary.NORMAL
+import id.android.workshop.genai.feature.textsummary.TextSummary.STREAM
 import id.android.workshop.genai.feature.textsummary.TextSummaryUiState
 import id.android.workshop.genai.ui.theme.GenAIWorkshopTheme
 
@@ -43,7 +48,7 @@ import id.android.workshop.genai.ui.theme.GenAIWorkshopTheme
 fun TextSummaryScreen(
   uiState: TextSummaryUiState = TextSummaryUiState.Loading,
   focusManager: FocusManager = LocalFocusManager.current,
-  onTextSummaryClick: (String) -> Unit = {}
+  onTextSummaryClick: (String, TextSummary) -> Unit = { _, _ -> run {} }
 ) {
   var textToSummarize by rememberSaveable {
     mutableStateOf("")
@@ -72,20 +77,44 @@ fun TextSummaryScreen(
             all = 16.dp
           ).fillMaxWidth()
       )
-      TextButton(
-        onClick = {
-          if (textToSummarize.isNotBlank()) {
-            focusManager.clearFocus()
-            onTextSummaryClick(textToSummarize)
-          }
-        },
+      var checked by rememberSaveable {
+        mutableStateOf(false)
+      }
+
+      Row(
         modifier = Modifier
           .padding(
+            start = 16.dp,
             end = 16.dp,
             bottom = 16.dp
-          ).align(Alignment.End)
+          ).fillMaxWidth(),
+        horizontalArrangement = Arrangement.End
       ) {
-        Text(text = stringResource(id = R.string.action_go))
+        Switch(
+          checked = checked,
+          onCheckedChange = { isChecked ->
+            checked = isChecked
+          }
+        )
+        TextButton(
+          modifier = Modifier
+            .padding(
+              start = 4.dp
+            ),
+          onClick = {
+            if (textToSummarize.isNotBlank()) {
+              focusManager.clearFocus()
+
+              val switchState = if (checked) STREAM else NORMAL
+              onTextSummaryClick(
+                textToSummarize,
+                switchState
+              )
+            }
+          },
+        ) {
+          Text(text = stringResource(id = R.string.action_go))
+        }
       }
     }
 
@@ -121,7 +150,8 @@ fun TextSummaryScreen(
                 all = 16.dp
               ).fillMaxWidth()
           ) {
-            Icon(imageVector = Icons.Outlined.Person,
+            Icon(
+              imageVector = Icons.Outlined.Person,
               contentDescription = "Person Icon",
               tint = MaterialTheme.colorScheme.onSecondary,
               modifier = Modifier

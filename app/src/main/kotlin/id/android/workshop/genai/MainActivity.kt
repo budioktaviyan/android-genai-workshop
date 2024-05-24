@@ -33,8 +33,11 @@ class MainActivity : ComponentActivity() {
 
           TextSummaryScreen(
             uiState = textSummaryUiState,
-            onTextSummaryClick = { inputText ->
-              textSummaryViewModel.summarize(inputText)
+            onTextSummaryClick = { inputText, switchState ->
+              textSummaryViewModel.summarize(
+                inputText,
+                switchState
+              )
             }
           )
         }
