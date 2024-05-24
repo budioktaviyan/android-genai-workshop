@@ -3,4 +3,6 @@
   <string name="action_go">Go!</string>
   <string name="textsummary_label">Text</string>
   <string name="textsummary_hint">Input text to summarize</string>
+  <string name="chatbot_label">Message</string>
+  <string name="chatbot_send">Send</string>
 </resources>
