@@ -1,16 +1,25 @@
 package id.android.workshop.genai.ui.screen
 
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeContent
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material3.Card
@@ -23,14 +32,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusManager
-import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
@@ -39,6 +49,7 @@ import id.android.workshop.genai.feature.chatbot.ChatBotMessage
 import id.android.workshop.genai.feature.chatbot.Participant.ERROR
 import id.android.workshop.genai.feature.chatbot.Participant.MODEL
 import id.android.workshop.genai.feature.chatbot.Participant.USER
+import kotlinx.coroutines.launch
 
 @Composable
 fun ChatList(
@@ -135,12 +146,21 @@ fun ChatBubbleItem(
 
 @Composable
 fun MessageInput(
-  focusManager: FocusManager = LocalFocusManager.current,
   onSendMessage: (String) -> Unit,
   resetScroll: () -> Unit = {}
 ) {
   var userMessage by rememberSaveable {
     mutableStateOf("")
+  }
+
+  val scrollState = rememberScrollState()
+  val coroutineScope = rememberCoroutineScope()
+  val keyboardHeight = WindowInsets.ime.getBottom(LocalDensity.current)
+
+  LaunchedEffect(key1 = keyboardHeight) {
+    coroutineScope.launch {
+      scrollState.scrollBy(keyboardHeight.toFloat())
+    }
   }
 
   ElevatedCard(
@@ -149,6 +169,8 @@ fun MessageInput(
   ) {
     Row(
       modifier = Modifier
+        .verticalScroll(scrollState)
+        .windowInsetsPadding(WindowInsets.safeContent.only(WindowInsetsSides.Bottom))
         .padding(
           all = 16.dp
         ).fillMaxWidth()
@@ -168,7 +190,6 @@ fun MessageInput(
       IconButton(
         onClick = {
           if (userMessage.isNotBlank()) {
-            focusManager.clearFocus()
             onSendMessage(userMessage)
             userMessage = ""
             resetScroll()
